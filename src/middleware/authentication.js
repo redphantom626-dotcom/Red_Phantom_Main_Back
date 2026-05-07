@@ -4,19 +4,26 @@ import UserModel from "../DB/models/User.model.js";
 export const authentication = () => {
   return async (req, res, next) => {
     try {
-      const { token } = req.headers;
-      if (!token) {
+      const authHeader = req.headers.authorization;
+
+      if (!authHeader) {
         return res.json({
           message: "Token Required",
         });
       }
+
+      const token = authHeader.split(" ")[1];
+
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
       const user = await UserModel.findById(decoded.id);
+
       if (!user) {
         return res.json({
           message: "User Not Found",
         });
       }
+
       req.user = user;
       next();
     } catch (error) {
